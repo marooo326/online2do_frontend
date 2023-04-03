@@ -1,6 +1,6 @@
 # Responsive UI
 Flutter Responsive UI 연습용 Repository
-- [참고영상](https://www.youtube.com/watch?v=gc8-tS-6pe4&list=WL&index=35)
+- [참고영상](https://www.youtube.com/watch?v=9bo1V9STW2c&list=WL&index=34)
 
 ## 예시 
 ### 1. Mobile Scaffold
