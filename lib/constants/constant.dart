@@ -8,8 +8,8 @@ var myAppBar = AppBar(
 
 var myDrawer = Drawer(
   backgroundColor: Colors.grey.shade300,
-  child: Column(
-    children: const [
+  child: const Column(
+    children: [
       DrawerHeader(
         child: Icon(Icons.favorite),
       ),
