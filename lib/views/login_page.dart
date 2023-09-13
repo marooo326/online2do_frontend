@@ -19,6 +19,16 @@ class _LoginPageState extends State<LoginPage> {
   User? userInfo;
 
   Future<void> _sendLoginRequest(String username) async {
+    if (username == "") {
+      showDialog(
+        context: context,
+        builder: (context) => const AlertDialog(
+          title: Text("🥲 이름은 공백일 수 없습니다 🥲"),
+        ),
+      );
+      return;
+    }
+
     Jwt jwt = await LoginApiService.login(username);
     setState(() {
       userInfo = User(username: username, token: jwt);
@@ -39,7 +49,9 @@ class _LoginPageState extends State<LoginPage> {
                   vertical: 20,
                 ),
                 child: TextField(
+                  autofocus: true,
                   controller: _controller,
+                  onSubmitted: (value) => _sendLoginRequest(value),
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
                     hintText: "이름을 입력하세요",
