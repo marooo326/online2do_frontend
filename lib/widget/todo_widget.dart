@@ -12,10 +12,26 @@ class TodoWidget extends StatefulWidget {
 }
 
 class _TodoWidgetState extends State<TodoWidget> {
-  late Future<List<Todo>> todos;
+  // snapshot 데이터의 복사본
+  List<Todo>? todos;
+  final TextEditingController _controller = TextEditingController();
 
-  Future<List<Todo>> fetchData(String accessToken) {
-    return TodoApiService.getTodos(accessToken);
+  void fetchTodoData(String accessToken) async {
+    todos = await TodoApiService.getTodos(accessToken);
+    setState(() {});
+  }
+
+  void createNewTodo(String accessToken, String contents) async {
+    int id = await TodoApiService.postTodo(accessToken, contents);
+    setState(() {
+      todos!.add(Todo(
+          id: id, contents: contents, isCompleted: false, author: "author"));
+      _controller.clear();
+    });
+  }
+
+  void updateTodoState(String accessToken, Todo todo, bool state) {
+    TodoApiService.updateTodo(accessToken, todo.id, state);
   }
 
   @override
@@ -25,65 +41,71 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(context.watch<User>().username),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "🔥TODO LIST🔥",
-                style: TextStyle(
-                  fontSize: 30,
+    final String accessToken = context.watch<User>().getAccessToken();
+
+    if (todos == null) {
+      // 데이터가 아직 로드되지 않은 경우
+      fetchTodoData(accessToken);
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      // 데이터가 로드된 경우
+      return Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              context.watch<User>().username,
+            ),
+            const Text(
+              "🔥TODO LIST🔥",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              flex: 30,
+              child: ListView.builder(
+                itemCount: todos!.length,
+                itemBuilder: (context, index) {
+                  return Row(
+                    children: [
+                      Checkbox(
+                        value: todos![index].isCompleted,
+                        onChanged: (bool? state) {
+                          updateTodoState(accessToken, todos![index], state!);
+                          setState(() {
+                            todos![index].isCompleted = state;
+                          });
+                        },
+                      ),
+                      Text(
+                        todos![index].contents,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: TextField(
+                textAlign: TextAlign.center,
+                controller: _controller,
+                onSubmitted: (contents) => createNewTodo(accessToken, contents),
+                decoration: const InputDecoration(
+                  hintText: "🔥Enter Todo and press Enter🔥",
                 ),
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          FutureBuilder(
-            future: fetchData(context.watch<User>().getAccessToken()),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 데이터가 아직 로드되지 않은 경우
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                // 에러가 발생한 경우
-                return Text('Error: ${snapshot.error}');
-              } else {
-                // 데이터가 로드된 경우
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      return Row(
-                        children: [
-                          Checkbox(
-                            value: snapshot.data![index].isCompleted,
-                            onChanged: (bool? state) {
-                              setState(() {
-                                snapshot.data![index].isCompleted = state!;
-                              });
-                            },
-                          ),
-                          Text(
-                            snapshot.data![index].contents,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
+            )
+          ],
+        ),
+      );
+    }
   }
 }

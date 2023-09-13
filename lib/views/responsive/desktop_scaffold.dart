@@ -18,15 +18,18 @@ class _DesktopScaffoldState extends State<DesktopScaffold> {
       body: Row(
         children: [
           //open drawer
-          myDrawer,
+          Expanded(
+            flex: 1,
+            child: myDrawer,
+          ),
           const Expanded(
             flex: 2,
             child: TodoWidget(),
           ),
           Expanded(
             flex: 1,
-            child: Container(
-              color: Colors.lightBlue,
+            child: Drawer(
+              backgroundColor: Colors.lightBlue.shade200,
             ),
           ),
         ],
