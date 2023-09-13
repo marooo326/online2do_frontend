@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_ui/constants/constant.dart';
-import 'package:responsive_ui/widget/todo_box.dart';
+import 'package:responsive_ui/widget/todo_widget.dart';
 
-class TabletScaffold extends StatefulWidget {
-  const TabletScaffold({super.key});
+class MobileScaffold extends StatefulWidget {
+  const MobileScaffold({super.key});
 
   @override
-  State<TabletScaffold> createState() => _TabletScaffoldState();
+  State<MobileScaffold> createState() => _MobileScaffoldState();
 }
 
-class _TabletScaffoldState extends State<TabletScaffold> {
+class _MobileScaffoldState extends State<MobileScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +21,7 @@ class _TabletScaffoldState extends State<TabletScaffold> {
         children: [
           const Expanded(
             flex: 2,
-            child: TodoBox(),
+            child: TodoWidget(),
           ),
           Expanded(
             flex: 1,

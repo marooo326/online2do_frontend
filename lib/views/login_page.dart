@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_ui/models/jwt.dart';
 import 'package:responsive_ui/models/user.dart';
-import 'package:responsive_ui/views/desktop_scaffold.dart';
-import 'package:responsive_ui/views/responsive_layout.dart';
-import 'package:responsive_ui/views/tablet_scaffold.dart';
+import 'package:responsive_ui/services/login_api_service.dart';
+import 'package:responsive_ui/views/responsive/desktop_scaffold.dart';
+import 'package:responsive_ui/views/responsive/mobile_scaffold.dart';
+import 'package:responsive_ui/views/responsive/responsive_layout.dart';
 
-class EnterPage extends StatefulWidget {
-  const EnterPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<EnterPage> createState() => _EnterPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _EnterPageState extends State<EnterPage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _controller = TextEditingController();
+  User? userInfo;
 
-  bool isEnterd = false;
-  String username = "";
-
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _sendLoginRequest(String username) async {
+    Jwt jwt = await LoginApiService.login(username);
+    setState(() {
+      userInfo = User(username: username, token: jwt);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isEnterd) {
+    if (userInfo == null) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -45,12 +47,7 @@ class _EnterPageState extends State<EnterPage> {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    username = _controller.text;
-                    isEnterd = true;
-                  });
-                },
+                onPressed: () => _sendLoginRequest(_controller.text),
                 child: const Text("확인"),
               ),
             ],
@@ -59,9 +56,9 @@ class _EnterPageState extends State<EnterPage> {
       );
     } else {
       return ChangeNotifierProvider(
-        create: (context) => User(username: username),
+        create: (context) => userInfo,
         child: const ResponsiveLayout(
-          tabletScaffold: TabletScaffold(),
+          mobileScaffold: MobileScaffold(),
           desktopScaffold: DesktopScaffold(),
         ),
       );

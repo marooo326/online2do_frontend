@@ -1,30 +1,25 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_ui/constants/dummy.dart';
 import 'package:responsive_ui/models/todo.dart';
 import 'package:responsive_ui/models/user.dart';
+import 'package:responsive_ui/services/todo_api_service.dart';
 
-class TodoBox extends StatefulWidget {
-  const TodoBox({super.key});
+class TodoWidget extends StatefulWidget {
+  const TodoWidget({super.key});
 
   @override
-  State<TodoBox> createState() => _TodoBoxState();
+  State<TodoWidget> createState() => _TodoWidgetState();
 }
 
-class _TodoBoxState extends State<TodoBox> {
+class _TodoWidgetState extends State<TodoWidget> {
   late Future<List<Todo>> todos;
 
-  Future<List<Todo>> fetchData() async {
-    await Future.delayed(const Duration(seconds: 1));
-    List<dynamic> parsedJson = await jsonDecode(dummyData);
-    return parsedJson.map((json) => Todo.fromJson(json)).toList();
+  Future<List<Todo>> fetchData(String accessToken) {
+    return TodoApiService.getTodos(accessToken);
   }
 
   @override
   void initState() {
-    todos = fetchData();
     super.initState();
   }
 
@@ -52,7 +47,7 @@ class _TodoBoxState extends State<TodoBox> {
             height: 20,
           ),
           FutureBuilder(
-            future: todos,
+            future: fetchData(context.watch<User>().getAccessToken()),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // 데이터가 아직 로드되지 않은 경우
@@ -69,15 +64,15 @@ class _TodoBoxState extends State<TodoBox> {
                       return Row(
                         children: [
                           Checkbox(
-                            value: snapshot.data![index].completed,
+                            value: snapshot.data![index].isCompleted,
                             onChanged: (bool? state) {
                               setState(() {
-                                snapshot.data![index].completed = state!;
+                                snapshot.data![index].isCompleted = state!;
                               });
                             },
                           ),
                           Text(
-                            snapshot.data![index].task,
+                            snapshot.data![index].contents,
                           ),
                         ],
                       );
